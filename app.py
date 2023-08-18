@@ -72,7 +72,7 @@ if st.button("Predict"):
       #b="Low risk"
   #st.success('The risk group:'+ b)
   
-  explainer = shap.TreeExplainer(xgb.predict,trainx)
+  explainer = shap.TreeExplainer(xgb.predict_proba,trainx)
   shap_values = explainer.shap_values(outputdf)
   shap.plots.waterfall(shap_values[0])
 
