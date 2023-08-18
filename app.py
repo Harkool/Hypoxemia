@@ -1,4 +1,7 @@
 import streamlit as st
+
+
+
 import numpy as np
 from numpy import array
 from numpy import argmax
@@ -35,23 +38,23 @@ def user_input_features():
     st.sidebar.header('Make a prediction')
     st.sidebar.write('User input parameters below ⬇️')
     a1 = st.sidebar.number_input("BMI",min_value=10.0,max_value=None,step=0.1)
-    a2 = st.sidebar.selectbox("OSAHS? 0=NO,1=YES", ('0', '1'))
+    a2 = st.sidebar.selectbox('OSAHS',('NO','YES'))
     a3 = st.sidebar.slider('Basal_oxygen_saturation', 90.0, 100.0, 95.0,1.0)
     a4 = st.sidebar.number_input("Remifentanil_dosage",min_value=0.1,max_value=None,step=0.1)
     
-    #result=""
-    #if a2=="Yes":
-        #a2=1
-    #else: 
-        #a2=0 
+    result=""
+    if a2=="Yes":
+        a2=1
+    else: 
+        a2=0 
     output = [a1,a2,a3,a4]
     return output
 
 outputdf = user_input_features()
 outputdf = pd.DataFrame([outputdf], columns= trainx.columns)
-from sklearn import preprocessing
-lbl = preprocessing.LabelEncoder()
-outputdf['OSAHS'] = lbl.fit_transform(outputdf['OSAHS'].astype(str))
+#from sklearn import preprocessing
+#lbl = preprocessing.LabelEncoder()
+#outputdf['OSAHS'] = lbl.fit_transform(outputdf['OSAHS'].astype(str))
 
 
 p1 = xgb.predict(outputdf)[0]
@@ -69,11 +72,11 @@ if st.button("Predict"):
       #b="Low risk"
   #st.success('The risk group:'+ b)
   
-  explainer = shap.KernelExplainer(xgb.predict,trainx)
+  explainer = shap.TreeExplainer(xgb.predict,trainx)
   shap_values = explainer.shap_values(outputdf)
-  
+  shap.plots.waterfall(shap_values[0])
 
-  from shap.plots import _waterfall
+#from shap.plots import _waterfall
 #st_shap(shap.plots.waterfall(shap_values[0]),  height=500, width=1700)
   st.set_option('deprecation.showPyplotGlobalUse', False)
   _waterfall.waterfall_legacy(explainer.expected_value,shap_values[0,:],feature_names=trainx.columns)
